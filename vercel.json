@@ -9,6 +9,10 @@
   },
   "routes": [
     {
+      "src": "/(index\\.php)?",
+      "dest": "/index.php"
+    },
+    {
       "src": "/(.*)",
       "dest": "/$1"
     }
