@@ -1,6 +1,6 @@
 <?php
-require_once 'includes/db.php';
-include 'includes/header.php';
+require_once '../includes/db.php';
+include '../includes/header.php';
 
 $id = $_GET['id'] ?? null;
 if (!$id) die("Record ID missing.");
@@ -419,4 +419,4 @@ if (!$record) die("Record not found.");
 </script>
 
 
-<?php include 'includes/footer.php'; ?>
+<?php include '../includes/footer.php'; ?>

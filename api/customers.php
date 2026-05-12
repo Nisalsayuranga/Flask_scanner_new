@@ -1,6 +1,6 @@
 <?php
-require_once 'includes/db.php';
-include 'includes/header.php';
+require_once '../includes/db.php';
+include '../includes/header.php';
 
 $stmt = $pdo->query("
     SELECT c.*, COUNT(p.id) as total_pawnings 
@@ -50,4 +50,4 @@ $stmt = $pdo->query("
     </div>
 </div>
 
-<?php include 'includes/footer.php'; ?>
+<?php include '../includes/footer.php'; ?>
