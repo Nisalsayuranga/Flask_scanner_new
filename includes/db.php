@@ -2,12 +2,15 @@
 require_once 'config.php';
 
 try {
-    $pdo = new PDO("mysql:host=" . DB_HOST, DB_USER, DB_PASS);
+    if (DB_TYPE === 'pgsql') {
+        $dsn = "pgsql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME;
+        $pdo = new PDO($dsn, DB_USER, DB_PASS);
+    } else {
+        $dsn = "mysql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME;
+        $pdo = new PDO($dsn, DB_USER, DB_PASS);
+    }
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
-    // Create database if not exists
-    $pdo->exec("CREATE DATABASE IF NOT EXISTS " . DB_NAME);
-    $pdo->exec("USE " . DB_NAME);
+    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     die("Connection failed: " . $e->getMessage());
 }

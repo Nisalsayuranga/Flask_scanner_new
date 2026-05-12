@@ -23,15 +23,30 @@ function getConfig($key, $default = '') {
 }
 
 // Database configuration
-$mysqlUrl = getConfig('MYSQL_URL');
-if ($mysqlUrl) {
-    $url = parse_url($mysqlUrl);
-    define('DB_HOST', $url['host']);
-    define('DB_PORT', $url['port'] ?? 3306);
-    define('DB_USER', $url['user']);
-    define('DB_PASS', $url['pass'] ?? '');
-    define('DB_NAME', substr($url['path'], 1));
+$dbUrl = getConfig('DATABASE_URL');
+if ($dbUrl) {
+    // Check if it's a postgres URL (Supabase standard)
+    if (strpos($dbUrl, 'postgres') === 0) {
+        $url = parse_url($dbUrl);
+        define('DB_TYPE', 'pgsql');
+        define('DB_HOST', $url['host']);
+        define('DB_PORT', $url['port'] ?? 5432);
+        define('DB_USER', $url['user']);
+        define('DB_PASS', $url['pass'] ?? '');
+        define('DB_NAME', substr($url['path'], 1));
+    } else {
+        // Fallback to MySQL parsing if it's a mysql URL
+        $url = parse_url($dbUrl);
+        define('DB_TYPE', 'mysql');
+        define('DB_HOST', $url['host']);
+        define('DB_PORT', $url['port'] ?? 3306);
+        define('DB_USER', $url['user']);
+        define('DB_PASS', $url['pass'] ?? '');
+        define('DB_NAME', substr($url['path'], 1));
+    }
 } else {
+    // Default to local MySQL
+    define('DB_TYPE', 'mysql');
     define('DB_HOST', getConfig('DB_HOST', 'localhost'));
     define('DB_PORT', getConfig('DB_PORT', 3306));
     define('DB_USER', getConfig('DB_USER', 'root'));
