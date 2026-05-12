@@ -1,6 +1,6 @@
 <?php
-require_once '../includes/db.php';
-include '../includes/header.php';
+require_once __DIR__ . '/../includes/db.php';
+include __DIR__ . '/../includes/header.php';
 
 // Get some stats
 // Get some stats
@@ -155,4 +155,4 @@ $pending_verifications = $pdo->query("SELECT COUNT(*) FROM pawn_records WHERE ve
     </div>
 </div>
 
-<?php include '../includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>

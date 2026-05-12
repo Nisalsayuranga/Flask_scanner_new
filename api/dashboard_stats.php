@@ -1,7 +1,7 @@
 <?php
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *'); // Allow React to access
-require_once '../includes/db.php';
+require_once __DIR__ . '/../includes/db.php';
 
 try {
     // 1. Total Revenue (Principal Amount Sum)

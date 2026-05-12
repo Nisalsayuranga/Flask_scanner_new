@@ -1,6 +1,6 @@
 <?php
-require_once '../includes/db.php';
-include '../includes/header.php';
+require_once __DIR__ . '/../includes/db.php';
+include __DIR__ . '/../includes/header.php';
 
 // Get filter values
 $search = $_GET['search'] ?? '';
@@ -198,4 +198,4 @@ function submitBulkDelete() {
     </div>
 </div>
 
-<?php include '../includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>
