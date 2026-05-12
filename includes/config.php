@@ -31,8 +31,8 @@ if ($dbUrl) {
         define('DB_TYPE', 'pgsql');
         define('DB_HOST', $url['host']);
         define('DB_PORT', $url['port'] ?? 5432);
-        define('DB_USER', $url['user']);
-        define('DB_PASS', $url['pass'] ?? '');
+        define('DB_USER', urldecode($url['user']));
+        define('DB_PASS', isset($url['pass']) ? urldecode($url['pass']) : '');
         define('DB_NAME', substr($url['path'], 1));
     } else {
         // Fallback to MySQL parsing if it's a mysql URL
