@@ -32,7 +32,7 @@ try {
       $id_col,
       full_name varchar(255) NOT NULL,
       nic_number varchar(20) NOT NULL UNIQUE,
-      contact_number varchar(20) DEFAULT NULL,
+      phone_number varchar(20) DEFAULT NULL,
       address text DEFAULT NULL,
       created_at " . (DB_TYPE === 'pgsql' ? "TIMESTAMP" : "datetime") . " DEFAULT CURRENT_TIMESTAMP
     )";
