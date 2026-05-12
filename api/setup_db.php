@@ -19,6 +19,12 @@ try {
     echo "<h1>Database Setup</h1>";
     echo "Connected to " . DB_TYPE . " successfully!<br><br>";
 
+    // Optional: Force drop tables
+    if (isset($_GET['force']) && $_GET['force'] === 'true') {
+        $pdo->exec("DROP TABLE IF EXISTS pawn_records, customers, api_usage CASCADE");
+        echo "⚠️ Tables dropped successfully. Re-creating...<br>";
+    }
+
     // 1. Create Customers Table
     $id_col = (DB_TYPE === 'pgsql') ? "id SERIAL PRIMARY KEY" : "id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY";
     
