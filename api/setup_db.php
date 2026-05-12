@@ -58,6 +58,27 @@ try {
     $pdo->exec($sql2);
     echo "✅ Pawn Records table created/verified.<br>";
 
+    // 3. Create API Usage Table
+    $sql3 = "CREATE TABLE IF NOT EXISTS api_usage (
+      $id_col,
+      api_key varchar(255) NOT NULL,
+      usage_count int DEFAULT 0,
+      last_used TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )";
+
+    $pdo->exec($sql3);
+    echo "✅ API Usage table created/verified.<br>";
+
+    // Add some dummy data if empty
+    $count = $pdo->query("SELECT COUNT(*) FROM api_usage")->fetchColumn();
+    if ($count == 0) {
+        $stmt = $pdo->prepare("INSERT INTO api_usage (api_key) VALUES (?)");
+        foreach (API_KEYS as $key) {
+            $stmt->execute([$key]);
+        }
+        echo "✅ API Keys initialized in database.<br>";
+    }
+
     echo "<br><b>Database setup complete!</b>";
     echo "<br><a href='index.php'>Go to Dashboard</a>";
 

@@ -73,10 +73,22 @@ define('BRANCHES', [
 ]);
 
 // Directories
-define('UPLOAD_DIR', __DIR__ . '/../uploads/');
-define('SPLIT_DIR', __DIR__ . '/../uploads/splits/');
+// On Vercel, we must use /tmp for temporary file storage
+if (getenv('VERCEL') || getenv('VERCEL_ENV')) {
+    define('UPLOAD_DIR', '/tmp/uploads/');
+    define('SPLIT_DIR', '/tmp/uploads/splits/');
+} else {
+    define('UPLOAD_DIR', __DIR__ . '/../uploads/');
+    define('SPLIT_DIR', __DIR__ . '/../uploads/splits/');
+}
 
-// Ensure directories exist
-if (!file_exists(UPLOAD_DIR)) mkdir(UPLOAD_DIR, 0777, true);
-if (!file_exists(SPLIT_DIR)) mkdir(SPLIT_DIR, 0777, true);
+// Ensure directories exist (only if writable)
+if (!getenv('VERCEL') && !getenv('VERCEL_ENV')) {
+    if (!file_exists(UPLOAD_DIR)) @mkdir(UPLOAD_DIR, 0777, true);
+    if (!file_exists(SPLIT_DIR)) @mkdir(SPLIT_DIR, 0777, true);
+} else {
+    // On Vercel, we still need to create /tmp/uploads
+    if (!file_exists(UPLOAD_DIR)) @mkdir(UPLOAD_DIR, 0777, true);
+    if (!file_exists(SPLIT_DIR)) @mkdir(SPLIT_DIR, 0777, true);
+}
 ?>

@@ -3,7 +3,7 @@ require_once 'config.php';
 
 try {
     if (DB_TYPE === 'pgsql') {
-        $dsn = "pgsql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME;
+        $dsn = "pgsql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME . ";sslmode=require";
         $pdo = new PDO($dsn, DB_USER, DB_PASS);
     } else {
         $dsn = "mysql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME;
