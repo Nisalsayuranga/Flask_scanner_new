@@ -1,8 +1,11 @@
 .env
+.env_new
 uploads/
-api_output.txt
+uploads/splits/
 debug_log.txt
-models_list.json
-.vscode/
-.idea/
-*.log
+api_output.txt
+.gemini/
+node_modules/
+.next/
+vendor/
+composer.lock
