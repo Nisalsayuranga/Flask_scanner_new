@@ -77,9 +77,11 @@ define('BRANCHES', [
 if (getenv('VERCEL') || getenv('VERCEL_ENV')) {
     define('UPLOAD_DIR', '/tmp/uploads/');
     define('SPLIT_DIR', '/tmp/uploads/splits/');
+    define('TEMP_FILE_PATH', '/tmp/');
 } else {
     define('UPLOAD_DIR', __DIR__ . '/../uploads/');
     define('SPLIT_DIR', __DIR__ . '/../uploads/splits/');
+    define('TEMP_FILE_PATH', __DIR__ . '/../');
 }
 
 // Ensure directories exist (only if writable)

@@ -79,7 +79,7 @@ class VisionProcessor {
                         if (is_array($data)) {
                             if (isset($data[0])) $data = $data[0];
                             // Save working model to log for debugging
-                            file_put_contents('working_model.txt', "$version / $modelName");
+                            file_put_contents(TEMP_FILE_PATH . 'working_model.txt', "$version / $modelName");
                             return $data;
                         }
                     }
