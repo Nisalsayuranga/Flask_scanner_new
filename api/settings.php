@@ -1,6 +1,6 @@
 <?php
-require_once 'includes/db.php';
-include 'includes/header.php';
+require_once __DIR__ . '/../includes/db.php';
+include __DIR__ . '/../includes/header.php';
 
 $api_stats = $pdo->query("SELECT * FROM api_usage ORDER BY last_used DESC")->fetchAll();
 ?>
@@ -54,4 +54,4 @@ $api_stats = $pdo->query("SELECT * FROM api_usage ORDER BY last_used DESC")->fet
     </div>
 </div>
 
-<?php include 'includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>

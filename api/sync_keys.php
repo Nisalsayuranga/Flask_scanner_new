@@ -1,6 +1,6 @@
 <?php
-require_once 'includes/config.php';
-require_once 'includes/db.php';
+require_once __DIR__ . '/../includes/config.php';
+require_once __DIR__ . '/../includes/db.php';
 
 echo "Refreshing API Keys in Database...<br>";
 

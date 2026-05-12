@@ -1,5 +1,5 @@
 <?php
-require_once 'includes/db.php';
+require_once __DIR__ . '/../includes/db.php';
 
 // Get filter values from GET
 $search = $_GET['search'] ?? '';
