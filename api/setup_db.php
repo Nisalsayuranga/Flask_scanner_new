@@ -70,7 +70,7 @@ try {
     $sql3 = "CREATE TABLE IF NOT EXISTS api_usage (
       $id_col,
       api_key varchar(255) NOT NULL,
-      usage_count int DEFAULT 0,
+      request_count int DEFAULT 0,
       last_used TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )";
 
