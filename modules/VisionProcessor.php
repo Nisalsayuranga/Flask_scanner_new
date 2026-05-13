@@ -8,6 +8,10 @@ class VisionProcessor {
     public function __construct($pdo) {
         $this->pdo = $pdo;
         $this->api_keys = API_KEYS;
+        
+        if (empty($this->api_keys)) {
+            throw new Exception("No Gemini API keys found in configuration. Please check your Environment Variables.");
+        }
     }
 
     private function getNextApiKey() {
@@ -20,13 +24,11 @@ class VisionProcessor {
     public function processImage($imagePath, $prompt) {
         $apiKey = $this->getNextApiKey();
         
-        // Comprehensive list of models to find the one that works for this key
+        // Use standard model identifiers
         $models = [
-            'models/gemini-1.5-flash',
-            'models/gemini-1.5-flash-latest',
-            'models/gemini-1.5-flash-001',
-            'models/gemini-1.5-flash-002',
-            'models/gemini-2.0-flash-exp'
+            'gemini-1.5-flash',
+            'gemini-1.5-flash-latest',
+            'gemini-pro-vision'
         ];
 
         $imageData = base64_encode(file_get_contents($imagePath));
@@ -38,7 +40,8 @@ class VisionProcessor {
             $versions = ['v1beta', 'v1'];
             
             foreach ($versions as $version) {
-                $apiUrl = "https://generativelanguage.googleapis.com/{$version}/{$modelName}:generateContent?key=" . $apiKey;
+                $fullModelName = (strpos($modelName, 'models/') === 0) ? $modelName : 'models/' . $modelName;
+                $apiUrl = "https://generativelanguage.googleapis.com/{$version}/{$fullModelName}:generateContent?key=" . $apiKey;
 
                 $payload = [
                     "contents" => [
