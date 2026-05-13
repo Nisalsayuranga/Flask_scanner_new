@@ -51,6 +51,7 @@ try {
       receipt_no varchar(50) DEFAULT NULL,
       issue_date date DEFAULT NULL,
       last_date date DEFAULT NULL,
+      article_description text DEFAULT NULL,
       weight_g decimal(10,3) DEFAULT NULL,
       weight_mg decimal(10,3) DEFAULT NULL,
       principal_amount decimal(15,2) DEFAULT NULL,
@@ -76,6 +77,18 @@ try {
 
     $pdo->exec($sql3);
     echo "✅ API Usage table created/verified.<br>";
+
+    // 4. Ensure article_description column exists (Safety for existing tables)
+    if (DB_TYPE === 'pgsql') {
+        $pdo->exec("ALTER TABLE pawn_records ADD COLUMN IF NOT EXISTS article_description text DEFAULT NULL");
+    } else {
+        // MySQL check
+        $cols = $pdo->query("SHOW COLUMNS FROM pawn_records LIKE 'article_description'")->fetch();
+        if (!$cols) {
+            $pdo->exec("ALTER TABLE pawn_records ADD COLUMN article_description text DEFAULT NULL AFTER last_date");
+        }
+    }
+    echo "✅ Schema consistency verified.<br>";
 
     // Add some dummy data if empty
     $count = $pdo->query("SELECT COUNT(*) FROM api_usage")->fetchColumn();
