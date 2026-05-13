@@ -31,10 +31,12 @@ class VisionProcessor {
             $cachedModel = trim(file_get_contents($workingModelFile));
         }
 
-        // 2. Prepare discovery list
+        // 2. Prepare discovery list based on what we found is available to your key
         $models = [
-            'gemini-1.5-flash',
-            'gemini-1.5-flash-latest'
+            'gemini-2.0-flash',
+            'gemini-flash-latest',
+            'gemini-2.0-flash-lite',
+            'gemini-pro-latest'
         ];
         $versions = ['v1', 'v1beta'];
 
