@@ -55,10 +55,10 @@ if ($dbUrl) {
 }
 
 // Gemini API Keys
-define('API_KEYS', array_filter([
+define('API_KEYS', array_values(array_filter(array_map('trim', [
     getConfig('GEMINI_API_KEY_1'),
     getConfig('GEMINI_API_KEY_2')
-]));
+]))));
 
 // Cloudinary Configuration
 define('CLOUDINARY_CLOUD_NAME', getConfig('CLOUDINARY_CLOUD_NAME'));

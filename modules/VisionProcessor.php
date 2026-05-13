@@ -34,11 +34,9 @@ class VisionProcessor {
         // 2. Prepare discovery list
         $models = [
             'gemini-1.5-flash',
-            'gemini-1.5-flash-latest',
-            'gemini-2.0-flash-exp',
-            'gemini-pro-vision'
+            'gemini-1.5-flash-latest'
         ];
-        $versions = ['v1beta', 'v1'];
+        $versions = ['v1', 'v1beta'];
 
         // 3. Prioritize cached model if available
         if ($cachedModel) {
