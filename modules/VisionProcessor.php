@@ -23,23 +23,40 @@ class VisionProcessor {
 
     public function processImage($imagePath, $prompt) {
         $apiKey = $this->getNextApiKey();
+        $workingModelFile = TEMP_FILE_PATH . 'working_model.txt';
         
-        // Use standard model identifiers
+        // 1. Try to load cached working model first
+        $cachedModel = null;
+        if (file_exists($workingModelFile)) {
+            $cachedModel = trim(file_get_contents($workingModelFile));
+        }
+
+        // 2. Prepare discovery list
         $models = [
             'gemini-1.5-flash',
             'gemini-1.5-flash-latest',
+            'gemini-2.0-flash-exp',
             'gemini-pro-vision'
         ];
+        $versions = ['v1beta', 'v1'];
+
+        // 3. Prioritize cached model if available
+        if ($cachedModel) {
+            list($cachedVersion, $cachedName) = explode('|', $cachedModel);
+            // Move this to the front of our search
+            array_unshift($models, $cachedName);
+            $models = array_unique($models);
+        }
 
         $imageData = base64_encode(file_get_contents($imagePath));
         $mimeType = mime_content_type($imagePath);
         $errors = [];
 
         foreach ($models as $modelName) {
-            // Try both v1 and v1beta for each model
-            $versions = ['v1beta', 'v1'];
-            
             foreach ($versions as $version) {
+                // If we have a cache and it's not THIS combination, we might want to skip it in discovery
+                // but for robustness we'll just iterate.
+                
                 $fullModelName = (strpos($modelName, 'models/') === 0) ? $modelName : 'models/' . $modelName;
                 $apiUrl = "https://generativelanguage.googleapis.com/{$version}/{$fullModelName}:generateContent?key=" . $apiKey;
 
@@ -81,8 +98,9 @@ class VisionProcessor {
                         $data = json_decode($text, true);
                         if (is_array($data)) {
                             if (isset($data[0])) $data = $data[0];
-                            // Save working model to log for debugging
-                            file_put_contents(TEMP_FILE_PATH . 'working_model.txt', "$version / $modelName");
+                            
+                            // Save this successful combination as the working model
+                            file_put_contents($workingModelFile, "$version|$modelName");
                             return $data;
                         }
                     }
