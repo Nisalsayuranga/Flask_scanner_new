@@ -76,35 +76,49 @@ class VisionProcessor {
                     ]
                 ];
 
-                $ch = curl_init($apiUrl);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_POST, true);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-                curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+                $retryCount = 0;
+                $maxRetries = 2;
+                $success = false;
                 
-                $response = curl_exec($ch);
-                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                curl_close($ch);
+                while ($retryCount <= $maxRetries) {
+                    $ch = curl_init($apiUrl);
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                    curl_setopt($ch, CURLOPT_POST, true);
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+                    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+                    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                    curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+                    
+                    $response = curl_exec($ch);
+                    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                    curl_close($ch);
 
-                if ($httpCode === 200) {
-                    $result = json_decode($response, true);
-                    if (isset($result['candidates'][0]['content']['parts'][0]['text'])) {
-                        $text = trim($result['candidates'][0]['content']['parts'][0]['text']);
-                        if (preg_match('/\{(?:[^{}]|(?R))*\}/s', $text, $matches)) {
-                            $text = $matches[0];
+                    if ($httpCode === 200) {
+                        $result = json_decode($response, true);
+                        if (isset($result['candidates'][0]['content']['parts'][0]['text'])) {
+                            $text = trim($result['candidates'][0]['content']['parts'][0]['text']);
+                            if (preg_match('/\{(?:[^{}]|(?R))*\}/s', $text, $matches)) {
+                                $text = $matches[0];
+                            }
+                            $data = json_decode($text, true);
+                            if (is_array($data)) {
+                                if (isset($data[0])) $data = $data[0];
+                                file_put_contents($workingModelFile, "$version|$modelName");
+                                return $data;
+                            }
                         }
-                        $data = json_decode($text, true);
-                        if (is_array($data)) {
-                            if (isset($data[0])) $data = $data[0];
-                            
-                            // Save this successful combination as the working model
-                            file_put_contents($workingModelFile, "$version|$modelName");
-                            return $data;
+                    } elseif ($httpCode === 503) {
+                        $retryCount++;
+                        if ($retryCount <= $maxRetries) {
+                            sleep(2); // Wait 2 seconds before retry
+                            continue;
                         }
                     }
-                } else {
+                    
+                    break; // Exit while loop if not 200 or 503 or max retries reached
+                }
+
+                if ($httpCode !== 200) {
                     $errorData = json_decode($response, true);
                     $apiErrorMsg = isset($errorData['error']['message']) ? $errorData['error']['message'] : '';
                     $errors[] = "[$version / $modelName]: HTTP $httpCode" . ($apiErrorMsg ? " - $apiErrorMsg" : "");

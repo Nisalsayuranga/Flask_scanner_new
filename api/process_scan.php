@@ -103,7 +103,11 @@ try {
     ]);
 
 } catch (Exception $e) {
-    if (isset($pdo) && $pdo->inTransaction()) $pdo->rollBack();
+    if (isset($pdo) && $pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    // Log detailed error for debugging
+    error_log("Process Scan Error: " . $e->getMessage());
     echo json_encode(['success' => false, 'error' => $e->getMessage()]);
 }
 ?>

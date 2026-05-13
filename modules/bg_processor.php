@@ -100,7 +100,9 @@ try {
     $pdo->commit();
 
 } catch (Exception $e) {
-    if (isset($pdo) && $pdo->inTransaction()) $pdo->rollBack();
+    if (isset($pdo) && $pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
     
     // Log error and update status to failed
     $stmt = $pdo->prepare("UPDATE pawn_records SET verification_status = 'failed', raw_ai_response = ? WHERE id = ?");
