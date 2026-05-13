@@ -110,7 +110,22 @@ class VisionProcessor {
             }
         }
 
-        throw new Exception("All models failed. Details:\n" . implode("\n", $errors));
+        // If all failed, try to list what models are actually available to this key
+        $listUrl = "https://generativelanguage.googleapis.com/v1beta/models?key=" . $apiKey;
+        $ch = curl_init($listUrl);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        $listResponse = curl_exec($ch);
+        curl_close($ch);
+        
+        $availableModels = "Could not list models.";
+        $listData = json_decode($listResponse, true);
+        if (isset($listData['models'])) {
+            $names = array_map(function($m) { return $m['name']; }, $listData['models']);
+            $availableModels = implode(", ", $names);
+        }
+
+        throw new Exception("All models failed. \nAvailable to this key: $availableModels\n\nDetails:\n" . implode("\n", $errors));
     }
 
     public function convertPdfToJpg($sourcePath) {
