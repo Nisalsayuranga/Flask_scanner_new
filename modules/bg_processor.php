@@ -42,7 +42,11 @@ try {
     $stmt = $pdo->prepare("
         INSERT INTO customers (full_name, nic_number, phone_number, address) 
         VALUES (?, ?, ?, ?) 
-        ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id), address=VALUES(address), phone_number=VALUES(phone_number)
+        ON CONFLICT (nic_number) 
+        DO UPDATE SET 
+            address = EXCLUDED.address, 
+            phone_number = EXCLUDED.phone_number
+        RETURNING id
     ");
     $stmt->execute([
         $result['full_name'] ?? 'Unknown',
@@ -50,7 +54,7 @@ try {
         $result['phone_number'] ?? '',
         $result['address'] ?? ''
     ]);
-    $customerId = $pdo->lastInsertId();
+    $customerId = $stmt->fetchColumn();
 
     // Update pawn record with extracted data
     $stmt = $pdo->prepare("
