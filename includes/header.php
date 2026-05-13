@@ -380,9 +380,14 @@
             <i class="fas fa-bolt"></i>
             <span>FLASK SCANNER</span>
         </div>
-        <ul class="nav-links">
             <li class="nav-item <?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?>">
                 <a href="index.php"><i class="fas fa-home"></i> Dashboard</a>
+            </li>
+            <li class="nav-item <?php echo (basename($_SERVER['PHP_SELF']) == 'records.php' && ($_GET['status'] ?? '') == 'pending') ? 'active' : ''; ?>">
+                <a href="records.php?status=pending"><i class="fas fa-clock"></i> Pending Records</a>
+            </li>
+            <li class="nav-item <?php echo (basename($_SERVER['PHP_SELF']) == 'records.php' && ($_GET['status'] ?? '') == 'completed') ? 'active' : ''; ?>">
+                <a href="records.php?status=completed"><i class="fas fa-check-circle"></i> Completed Records</a>
             </li>
             <li class="nav-item <?php echo basename($_SERVER['PHP_SELF']) == 'scan.php' ? 'active' : ''; ?>">
                 <a href="scan.php"><i class="fas fa-expand"></i> Single Scan</a>
@@ -390,8 +395,8 @@
             <li class="nav-item <?php echo basename($_SERVER['PHP_SELF']) == 'batch_scan.php' ? 'active' : ''; ?>">
                 <a href="batch_scan.php"><i class="fas fa-layer-group"></i> Batch Scan</a>
             </li>
-            <li class="nav-item <?php echo basename($_SERVER['PHP_SELF']) == 'records.php' ? 'active' : ''; ?>">
-                <a href="records.php"><i class="fas fa-database"></i> Records</a>
+            <li class="nav-item <?php echo (basename($_SERVER['PHP_SELF']) == 'records.php' && !isset($_GET['status'])) ? 'active' : ''; ?>">
+                <a href="records.php"><i class="fas fa-database"></i> All Records</a>
             </li>
             <li class="nav-item <?php echo basename($_SERVER['PHP_SELF']) == 'customers.php' ? 'active' : ''; ?>">
                 <a href="customers.php"><i class="fas fa-users"></i> Customers</a>

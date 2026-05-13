@@ -235,6 +235,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const bar = document.getElementById('progress-bar');
         const text = document.getElementById('progress-text');
         const btn = document.getElementById('upload-btn');
+        const elapsedEl = document.getElementById('elapsed-time');
+        const etaEl = document.getElementById('eta-time');
 
         modal.style.display = 'flex';
         btn.disabled = true;
@@ -242,6 +244,24 @@ document.addEventListener('DOMContentLoaded', function() {
         let completed = 0;
         let currentIndex = 0;
         const failedFiles = [];
+
+        // Timer Logic
+        let startTime = Date.now();
+        const timerInterval = setInterval(() => {
+            let diff = Math.floor((Date.now() - startTime) / 1000);
+            let mins = String(Math.floor(diff / 60)).padStart(2, '0');
+            let secs = String(diff % 60).padStart(2, '0');
+            elapsedEl.innerText = `Elapsed Time: ${mins}:${secs}`;
+            
+            if (completed > 0) {
+                let timePerFile = diff / completed;
+                let remainingFiles = total - completed;
+                let eta = Math.round(timePerFile * remainingFiles);
+                let eMins = String(Math.floor(eta / 60)).padStart(2, '0');
+                let eSecs = String(eta % 60).padStart(2, '0');
+                etaEl.innerText = `Estimated Remaining: ${eMins}:${eSecs}`;
+            }
+        }, 1000);
 
         log.innerHTML = `<span style="color:#60a5fa">⚡ Starting High-Speed Batch Processing (${Math.min(6, total)} Workers)</span><br><hr style="border-color:#1e293b; margin:10px 0;">`;
 
@@ -251,36 +271,46 @@ document.addEventListener('DOMContentLoaded', function() {
             const file = selectedFiles[currentIndex++];
             log.innerHTML += `<span style="color:#94a3b8">[W${workerId}]</span> Preparing ${file.name}...<br>`;
             
-            try {
-                const blob = await compressImage(file);
-                const fd = new FormData();
-                fd.append('bill_image', blob, file.name);
-                fd.append('batch_mode', '1');
+            let retryCount = 0;
+            const maxRetries = 2; // Auto-retry up to 2 times
 
-                const response = await fetch('process_scan.php', { method: 'POST', body: fd });
-                const resText = await response.text();
-                
-                let result;
+            const uploadFile = async () => {
                 try {
-                    result = JSON.parse(resText);
-                } catch (e) {
-                    log.innerHTML += `<span style="color:var(--danger)">✗ [W${workerId}] Server Error: ${resText.substring(0, 100)}...</span><br>`;
-                    failedFiles.push(file);
-                    completed++;
-                    await processNext(workerId);
-                    return;
-                }
+                    const blob = await compressImage(file);
+                    const fd = new FormData();
+                    fd.append('bill_image', blob, file.name);
+                    fd.append('batch_mode', '1');
 
-                if (result.success) {
-                    log.innerHTML += `<span style="color:#10b981">✓ [W${workerId}] Success: ${file.name}</span><br>`;
-                } else {
-                    log.innerHTML += `<span style="color:var(--danger)">✗ [W${workerId}] AI Error: ${result.error}</span><br>`;
-                    failedFiles.push(file);
+                    const response = await fetch('process_scan.php', { method: 'POST', body: fd });
+                    const resText = await response.text();
+                    
+                    let result;
+                    try {
+                        result = JSON.parse(resText);
+                    } catch (e) {
+                        throw new Exception(`Server Error: ${resText.substring(0, 50)}`);
+                    }
+
+                    if (result.success) {
+                        log.innerHTML += `<span style="color:#10b981">✓ [W${workerId}] Success: ${file.name}</span><br>`;
+                        return true;
+                    } else {
+                        throw new Error(result.error);
+                    }
+                } catch (e) {
+                    if (retryCount < maxRetries) {
+                        retryCount++;
+                        log.innerHTML += `<span style="color:var(--warning)">🔄 [W${workerId}] Retrying ${file.name} (${retryCount}/${maxRetries})...</span><br>`;
+                        return await uploadFile();
+                    } else {
+                        log.innerHTML += `<span style="color:var(--danger)">✗ [W${workerId}] Failed: ${file.name} - ${e.message}</span><br>`;
+                        return false;
+                    }
                 }
-            } catch (e) {
-                log.innerHTML += `<span style="color:var(--danger)">✗ [W${workerId}] Network Error: ${e.message}</span><br>`;
-                failedFiles.push(file);
-            }
+            };
+
+            const isSuccess = await uploadFile();
+            if (!isSuccess) failedFiles.push(file);
 
             completed++;
             bar.style.width = Math.round((completed / total) * 100) + '%';
@@ -290,21 +320,22 @@ document.addEventListener('DOMContentLoaded', function() {
         };
 
         const workers = [];
-        const workerCount = Math.min(6, total); // Increased to 6 for faster processing with multiple keys
+        const workerCount = Math.min(6, total);
         for (let i = 1; i <= workerCount; i++) {
             workers.push(processNext(i));
         }
 
         await Promise.all(workers);
+        clearInterval(timerInterval);
 
         if (failedFiles.length > 0) {
-            log.innerHTML += `<br><span style="color:var(--warning)"><b>⚠️ ${failedFiles.length} files failed. Please retry or check server logs.</b></span>`;
+            log.innerHTML += `<br><span style="color:var(--warning)"><b>⚠️ ${failedFiles.length} files failed after retries.</b></span>`;
             btn.disabled = false;
-            btn.innerText = "Retry Failed Files";
+            btn.innerText = "Retry Failed Files Manually";
             selectedFiles = [...failedFiles];
         } else {
-            log.innerHTML += '<br><b style="color:#10b981">🚀 All bills processed successfully!</b>';
-            setTimeout(() => window.location.href = 'records.php', 2000);
+            log.innerHTML += '<br><b style="color:#10b981">🚀 All bills processed successfully! Redirecting...</b>';
+            setTimeout(() => window.location.href = 'records.php?status=pending', 2000);
         }
     };
 });

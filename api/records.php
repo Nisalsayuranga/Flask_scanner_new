@@ -7,6 +7,7 @@ $search = $_GET['search'] ?? '';
 $branch = $_GET['branch'] ?? '';
 $date_from = $_GET['date_from'] ?? '';
 $date_to = $_GET['date_to'] ?? '';
+$status_filter = $_GET['status'] ?? '';
 
 // Build Query
 $sql = "
@@ -16,6 +17,12 @@ $sql = "
     WHERE 1=1
 ";
 $params = [];
+
+if ($status_filter === 'pending') {
+    $sql .= " AND p.verification_status != 'verified'";
+} elseif ($status_filter === 'completed') {
+    $sql .= " AND p.verification_status = 'verified'";
+}
 
 if ($search) {
     $sql .= " AND (p.ir_no LIKE ? OR p.r_no LIKE ? OR p.receipt_no LIKE ? OR c.full_name LIKE ? OR c.nic_number LIKE ? OR c.phone_number LIKE ?)";
@@ -44,8 +51,14 @@ $records = $stmt->fetchAll();
 
 <header class="fade-in">
     <div class="welcome">
-        <h1>Data Management System</h1>
-        <p>Advanced search and manage all digitized pawn records.</p>
+        <h1>
+            <?php 
+                if ($status_filter === 'pending') echo "Pending Verification";
+                elseif ($status_filter === 'completed') echo "Completed Records";
+                else echo "All Records";
+            ?>
+        </h1>
+        <p>Advanced search and manage <?php echo $status_filter ?: 'all'; ?> digitized pawn records.</p>
     </div>
     <div class="actions" style="display: flex; gap: 1rem;">
         <button id="bulkDeleteBtn" class="btn" style="background: #ef4444; color: white; display: none;" onclick="submitBulkDelete()">
